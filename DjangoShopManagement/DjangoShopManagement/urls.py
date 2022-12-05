@@ -24,6 +24,7 @@ from DjangoShopApp.views import CompanyNameViewSet
 router = routers.DefaultRouter()
 router.register("company", views.CompanyViewSet, basename="company")
 router.register("companybank", views.CompanyBankViewset, basename="companybank")
+router.register("product", views.ProductViewset, basename="product")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
