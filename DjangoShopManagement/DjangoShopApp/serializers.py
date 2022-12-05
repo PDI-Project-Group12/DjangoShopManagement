@@ -1,12 +1,15 @@
 from rest_framework import serializers
 
-from DjangoShopApp.models import Company
+from DjangoShopApp.models import Company, CompanyBank
 
 
-class CompanySerliazer(serializers.HyperlinkedModelSerializer):
+class CompanySerliazer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ["name", "license_no", "address", "contact_no", "email", "description"]
+        fields = "__all__"
 
-    def Is_valid(self):
-        pass
+
+class CompanyBankSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyBank
+        fields = "__all__"

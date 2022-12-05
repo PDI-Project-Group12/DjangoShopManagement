@@ -9,7 +9,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from DjangoShopApp.models import Company
-from DjangoShopApp.serializers import CompanySerliazer
+from DjangoShopApp.serializers import CompanySerliazer, CompanyBankSerializer
 
 
 class CompanyViewSet(viewsets.ViewSet):
@@ -25,7 +25,7 @@ class CompanyViewSet(viewsets.ViewSet):
     def create(self, request):
         try:
             serializer = CompanySerliazer(data=request.data, context={"request": request})
-            serializer.is_valid()
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             dict_response={"error": False,"message": "Company Data Save Successfully"}
         except:
@@ -37,12 +37,27 @@ class CompanyViewSet(viewsets.ViewSet):
             queryset=Company.objects.all()
             company=get_object_or_404(queryset,pk=pk)
             serializer=CompanySerliazer(company,data=request.data,context={"request":request})
-            serializer.is_valid()
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             dict_response = {"error": False, "message": "Successfully Updated Company Data"}
         except:
             dict_response = {"error": True, "message": "Error During Updating Company Data"}
 
+        return Response(dict_response)
+
+
+
+class CompanyBankViewset(viewsets.ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def create(self, request):
+        try:
+            serializer = CompanyBankSerializer(data=request.data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            dict_response={"error": False,"message": "Company Bank Data Save Successfully"}
+        except:
+            dict_response = {"error": True, "message": "Error During Saving Company Bank Data"}
         return Response(dict_response)
 
 
