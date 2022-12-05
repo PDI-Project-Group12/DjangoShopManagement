@@ -19,6 +19,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from DjangoShopApp import views
+from DjangoShopApp.views import CompanyNameViewSet
 
 router = routers.DefaultRouter()
 router.register("company", views.CompanyViewSet, basename="company")
@@ -28,5 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/gettoken/',TokenObtainPairView.as_view(),name="gettoken"),
-    path('api/resfresh_token/',TokenRefreshView.as_view(),name="refresh_token")
+    path('api/resfresh_token/',TokenRefreshView.as_view(),name="refresh_token"),
+    path('api/companybyname/<str:name>',CompanyNameViewSet.as_view(),name="companybyname")
 ]

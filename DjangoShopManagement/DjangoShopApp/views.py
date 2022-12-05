@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets
-
+from rest_framework import viewsets, generics
 
 # Create your views here.
 from rest_framework.permissions import IsAuthenticated
@@ -8,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from DjangoShopApp.models import Company
+from DjangoShopApp.models import Company, CompanyBank
 from DjangoShopApp.serializers import CompanySerliazer, CompanyBankSerializer
 
 
@@ -46,7 +45,6 @@ class CompanyViewSet(viewsets.ViewSet):
         return Response(dict_response)
 
 
-
 class CompanyBankViewset(viewsets.ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -59,6 +57,33 @@ class CompanyBankViewset(viewsets.ViewSet):
         except:
             dict_response = {"error": True, "message": "Error During Saving Company Bank Data"}
         return Response(dict_response)
+
+    def list(self, request):
+        companybank = CompanyBank.objects.all()
+        serializer = CompanyBankSerializer(companybank, many=True, context={"request": request})
+        response_dict = {"error": False, "message": "All Company Bank List Data", "data": serializer.data}
+        return Response(response_dict)
+
+    def retrieve(self,request,pk=None):
+        queryset=CompanyBank.objects.all()
+        companybank=get_object_or_404(queryset,pk=pk)
+        serializer=CompanyBankSerializer(companybank,context={"request":request})
+        return Response({"error":False,"message":"Single Data Fetch","data":serializer.data})
+
+    def update(self,request,pk=None):
+        queryset=CompanyBank.objects.all()
+        companybank=get_object_or_404(queryset,pk=pk)
+        serializer=CompanyBankSerializer(companybank,data=request.data,context={"request":request})
+        serializer.is_valid()
+        serializer.save()
+        return Response({"error":False,"message":"Data Has Been Updated"})
+
+
+class CompanyNameViewSet(generics.ListAPIView):
+    serializer_class = CompanySerliazer
+    def get_queryset(self):
+        name=self.kwargs["name"]
+        return Company.objects.filter(name=name)
 
 
 company_list = CompanyViewSet.as_view({"get": "list"})
