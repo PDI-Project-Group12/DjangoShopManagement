@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from DjangoShopApp.models import Company, CompanyBank, Product
-from DjangoShopApp.serializers import CompanySerliazer, CompanyBankSerializer, ProductSerliazer
+from DjangoShopApp.models import Company, CompanyBank, Product, ProductDetails
+from DjangoShopApp.serializers import CompanySerliazer, CompanyBankSerializer, ProductSerliazer, \
+    ProductDetailsSerializer, ProductDetailsSerializerSimple
 
 
 class CompanyViewSet(viewsets.ViewSet):
@@ -94,6 +95,25 @@ class ProductViewset(viewsets.ViewSet):
             serializer = ProductSerliazer(data=request.data, context={"request": request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
+
+            product_id=serializer.data['id'];
+            #Access the serializer Id which save database table
+            #print(product_id)
+
+            #Adding and saving Id into Product details serializer
+            product_details_list=[]
+            for product_details in request.data["product_details"]:
+                print(product_details)
+
+                #adding producr id which will work for product serializer
+                product_details["product_id"]=product_id
+                product_details_list.append(product_details)
+                print(product_details)
+
+            serializer2=ProductDetailsSerializer(data=product_details_list,many=True,context={"request":request})
+            serializer2.is_valid()
+            serializer2.save()
+
             dict_response={"error": False,"message": "Product Data Save Successfully"}
         except:
             dict_response = {"error": True, "message": "Error During Saving Product Data"}
@@ -102,14 +122,34 @@ class ProductViewset(viewsets.ViewSet):
     def list(self, request):
         product = Product.objects.all()
         serializer = ProductSerliazer(product, many=True, context={"request": request})
-        response_dict = {"error": False, "message": "All Product List Data", "data": serializer.data}
+
+        product_data=serializer.data
+        newproductlist=[]
+        #Adding extra keys for product details in product
+        for product in product_data:
+
+            #Accessing all the product details of current product id
+            product_details=ProductDetails.objects.filter(product_id=product["id"])
+            product_details_serializers=ProductDetailsSerializerSimple(product_details,many=True)
+            product["product_details"]=product_details_serializers.data
+            newproductlist.append(product)
+
+
+        response_dict = {"error": False, "message": "All Product List Data", "data": newproductlist}
         return Response(response_dict)
 
     def retrieve(self,request,pk=None):
         queryset=Product.objects.all()
         product=get_object_or_404(queryset,pk=pk)
         serializer=ProductSerliazer(product,context={"request":request})
-        return Response({"error":False,"message":"Single Data Fetch","data":serializer.data})
+
+        serializer_data=serializer.data
+        # Accessing all the product details of current product id
+        product_details = ProductDetails.objects.filter(product_id=serializer_data["id"])
+        product_details_serializers = ProductDetailsSerializerSimple(product_details, many=True)
+        serializer_data["product_details"] = product_details_serializers.data
+
+        return Response({"error":False,"message":"Single Data Fetch","data":serializer_data})
 
     def update(self,request,pk=None):
         queryset=Product.objects.all()

@@ -42,6 +42,12 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return response
 
 
+class ProductDetailsSerializerSimple(serializers.ModelSerializer):
+    class Meta:
+        model = ProductDetails
+        fields = "__all__"
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
