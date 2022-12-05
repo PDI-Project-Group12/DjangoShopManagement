@@ -1,15 +1,20 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 
-# Create your views here.
 
+# Create your views here.
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from DjangoShopApp.models import Company
 from DjangoShopApp.serializers import CompanySerliazer
 
 
 class CompanyViewSet(viewsets.ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         company = Company.objects.all()
@@ -39,9 +44,6 @@ class CompanyViewSet(viewsets.ViewSet):
             dict_response = {"error": True, "message": "Error During Updating Company Data"}
 
         return Response(dict_response)
-
-
-
 
 
 company_list = CompanyViewSet.as_view({"get": "list"})
